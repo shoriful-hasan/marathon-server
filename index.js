@@ -27,8 +27,8 @@ async function run() {
     /*{Collection Name}*/ 
     await client.connect();
 
-const MarathonAllData = client.db('marathons').collection('AllMarathon')
-
+const MarathonAllData  = client.db('marathons').collection('AllMarathon')
+const MarathonRegister = client.db('marathons').collection('Register') 
 // Single Marathons api Route
 app.post('/SingleMarathons',async(req,res)=>{
     const marathonData = req.body;
@@ -94,6 +94,73 @@ res.send(result)
 
 })
 
+// marathon registration count
+app.post('/MarathonReg',async(req,res)=>{
+const RegData = req.body;
+const result = await MarathonRegister.insertOne(RegData);
+const filter = {_id : new ObjectId(RegData.marathonID)}  
+
+const updateRegistration = {
+  $inc : {Regmarathon : 1}
+}
+
+const UpdateCount = await MarathonAllData.updateOne(filter,updateRegistration)
+
+
+res.json(result)
+
+})
+
+// marathon registration my apply list api 
+
+app.get('/MyApplymarathon/:email',async(req,res)=>{
+const email = req.params.email; 
+const search  = req.query.search;
+console.log('the frontend data in backend', search);
+
+const searchquery = {
+'email' : email,
+  title : { $regex :  search || '',   $options : 'i'}
+}
+const result = await MarathonRegister.find(searchquery).toArray();
+res.send(result)
+})
+
+
+
+
+
+// my apply delete
+app.delete('/MyApplyDelete/:id',async(req,res)=>{
+  const id = req.params.id;
+  const query = {_id : new ObjectId(id)}
+  const result = await MarathonRegister.deleteOne(query); 
+  res.send(result)
+})
+
+
+// my Apply Update api
+
+app.patch('/MyApplyUpdate/:id',async(req,res)=>{
+   const id = req.params.id;
+  const query = {_id : new ObjectId(id)}
+  const oldData = req.body;
+const UpdateApplyData = {
+  $set :{
+    firstName : oldData.fname,
+    LastName  : oldData.lname,
+    contact   : oldData.phone
+  }
+}
+const option = {upsert : true}
+
+const updateMyApply = await MarathonRegister.updateOne(query,UpdateApplyData,option)
+console.log('the Updated Data is here and log', updateMyApply);
+
+console.log('the old Data is', oldData , 'id is ', id);
+
+
+})
 
 
 
