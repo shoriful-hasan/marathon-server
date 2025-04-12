@@ -1,12 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const e = require('express');
-require('dotenv').config();
 const port = process.env.PORT || 8000;
 const app = express();
-app.use(express.json());
-app.use(cors());
+
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.9bbp7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -19,6 +18,20 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+ app.use(cors());
+
+app.use(express.json());
+
+
+app.get('/',async(req,res)=>{
+  res.send('the server is running....')
+})
+
+app.listen(port,()=>{console.log(`the server Runnign on PORT:${port}`);
+})
+
+
 
 
 async function run() {
@@ -39,8 +52,10 @@ app.post('/SingleMarathons',async(req,res)=>{
 })  
 // all marathonData get
 app.get('/GetAllMarathon',async(req,res)=>{
-  const result = await MarathonAllData.find().toArray();
+
+    const result = await MarathonAllData.find().toArray();
   res.send(result)
+
 })
 
 // Single marathon DetailsData Get
@@ -116,7 +131,7 @@ res.json(result)
 app.get('/MyApplymarathon/:email',async(req,res)=>{
 const email = req.params.email; 
 const search  = req.query.search;
-console.log('the frontend data in backend', search);
+// console.log('the frontend data in backend', search);
 
 const searchquery = {
 'email' : email,
@@ -154,11 +169,11 @@ const UpdateApplyData = {
 }
 const option = {upsert : true}
 
-const updateMyApply = await MarathonRegister.updateOne(query,UpdateApplyData,option)
-console.log('the Updated Data is here and log', updateMyApply);
+const result = await MarathonRegister.updateOne(query,UpdateApplyData,option)
+// console.log('the Updated Data is here and log', updateMyApply);
 
-console.log('the old Data is', oldData , 'id is ', id);
-
+// console.log('the old Data is', oldData , 'id is ', id);
+res.send(result)
 
 })
 
@@ -166,7 +181,7 @@ console.log('the old Data is', oldData , 'id is ', id);
 
     // Send a ping to confirm a successful connection
      await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -176,11 +191,6 @@ console.log('the old Data is', oldData , 'id is ', id);
 run().catch(console.dir);
 
 
-app.get('/',async(req,res)=>{
-  res.send('the server is running....')
-})
 
-app.listen(port,()=>{console.log(`the server Runnign on PORT:${port}`);
-})
 
 
